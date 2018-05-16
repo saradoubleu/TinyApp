@@ -49,15 +49,15 @@ app.get("/urls/:id/edit", (req, res) => {
   }
 });
 
-app.post("urls/:id", (req, res) => {
+app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  const urlDB = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL];
 
-  if (urlDB){
-    urlDB.shortURL = req.body.name;
-    res.redirect(`urls/${id}`);
+  if (longURL){
+    urlDatabase[shortURL] = req.body.adr;
+    res.redirect("/urls/");
   }else{
-    res.redirect("/urls");
+    res.redirect(`/urls/${shortURL}`);
   }
 });
 
