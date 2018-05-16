@@ -54,12 +54,16 @@ app.get("/urls/:id/edit", (req, res) => {
 
 //post login credentials
 app.post("/login", (req, res) => {
-
 const userName = req.body.username;
-
 res.cookie("username", userName);
 res.redirect("/urls");
 });
+
+//logout
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+})
 
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
