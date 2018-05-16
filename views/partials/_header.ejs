@@ -7,10 +7,22 @@
 </head>
 <body>
 <header>
-</header>
-<header>
 <h1>
 URLS Index</h1>
 </header>
+
+<% if (username){ %>
+<form method="POST" action="/logout" />
+  <%=username %>
+  <button name="Logout" value="/logout"/>Logout</button>
+</form>
+  <%}else { %>
+<form method="POST" action="/login"/>
+  <legend>Login Form
+  <input type="text" name="username"/>
+  <button value="Submit" name="Submit">Submit</button>
+  </legend>
+</form>
+<%}%>
 </body>
 </html>

@@ -1,8 +1,10 @@
 //Create a web server with Express
 // 'use strict'
-
+var cookieParser = require('cookie-parser')
 const express = require("express");
 const app = express();
+app.use(cookieParser())
+
 //process.env.PORT says to listen on whatever is in the nvironment port or to listen on port 8080 if none are defined
 const PORT = process.env.PORT || 8080;
 
@@ -17,8 +19,9 @@ const urlDatabase = {
 app.get("/urls", (req, res) =>{
   let templateVars = {
     urls: urlDatabase,
-    // message: 'Hi'
+    username: req.cookies["username"],
   };
+      // console.log(templateVars.username);
   res.render("urls_index", templateVars);
 });
 
@@ -45,8 +48,17 @@ app.get("/urls/:id/edit", (req, res) => {
     res.render("urls_show", {shortURL: shortURL, urlDB:urlDB});
   } else {
     res.status(404);
-    res.render("dogs/404");
+    res.render("urls/404");
   }
+});
+
+//post login credentials
+app.post("/login", (req, res) => {
+
+const userName = req.body.username;
+
+res.cookie("username", userName);
+res.redirect("/urls");
 });
 
 app.post("/urls/:id", (req, res) => {
@@ -68,6 +80,7 @@ app.post("/urls/:id/delete", (req, res) => {
   if (urlDB){
 
     delete urlDatabase[shortURL];
+        res.redirect("/urls");
 
   }else{
 
