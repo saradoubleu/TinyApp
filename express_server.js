@@ -1,5 +1,5 @@
 //Create a web server with Express
-'use strict'
+// 'use strict'
 
 const express = require("express");
 const app = express();
@@ -10,7 +10,8 @@ app.set("view engine", "ejs");
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "9sm5xK": "http://www.google.com",
+  "18TVx5": "http://www.thestar.com"
 };
 //new route handler
 app.get("/urls", (req, res) =>{
@@ -21,6 +22,13 @@ app.get("/urls", (req, res) =>{
   res.render("urls_index", templateVars);
 });
 
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
+
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
@@ -28,14 +36,13 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+
 app.get("/", (req, res)=> {
   res.end("Hello!'");
 });
 
 app.get("/urls.json", (req, res) => {
-  //sends a json response
   res.json(urlDatabase);
-  //JSON.stringify(urlDatabase)
 });
 
 app.get("/hello", (req, res) => {
@@ -46,3 +53,29 @@ app.listen(PORT, () => {
 console.log(`Example app listening on port ${PORT} !`);
 });
 
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // debug statement to see POST parameters
+  var random = generateRandomString();
+  urlDatabase[random] = req.body.longURL;
+  res.redirect("http://localhost:8080/urls/"+random);
+  console.log(urlDatabase);
+  // urlDatabase[req.params.id]
+  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  let longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
+
+function generateRandomString(){
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < 6; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+console.log(generateRandomString());
