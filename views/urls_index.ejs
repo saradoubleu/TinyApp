@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>TinyApp</title>
+</head>
+<body>
+  <header>
+    <% include ./partials/_header %>
+</header>
+<table>
+    <% for(item in urls) { %>
+      <tr>
+    <td><%= item %></td>
+    <td><%= urls[item] %></td>
+
+    <!-- <td><%= "link" %></td>
+ -->    </tr>
+  <% } %>
+</table>
+<a href="#"> Link </a>
+</body>
+</html>
