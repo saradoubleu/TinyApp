@@ -37,6 +37,44 @@ app.get("/urls/:id", (req, res) => {
 });
 
 
+app.get("/urls/:id/edit", (req, res) => {
+  const shortURL = req.params.id;
+  const urlDB = urlDatabase[shortURL];
+
+  if(urlDB){
+    res.render("urls_show", {shortURL: shortURL, urlDB:urlDB});
+  } else {
+    res.status(404);
+    res.render("dogs/404");
+  }
+});
+
+app.post("urls/:id", (req, res) => {
+  const shortURL = req.params.id;
+  const urlDB = urlDatabase[shortURL];
+
+  if (urlDB){
+    urlDB.shortURL = req.body.name;
+    res.redirect(`urls/${id}`);
+  }else{
+    res.redirect("/urls");
+  }
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  const shortURL = req.params.id;
+  const urlDB = urlDatabase[shortURL];
+
+  if (urlDB){
+
+    delete urlDatabase[shortURL];
+
+  }else{
+
+    res.redirect("/urls");
+  }
+});
+
 app.get("/", (req, res)=> {
   res.end("Hello!'");
 });
