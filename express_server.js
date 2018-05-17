@@ -59,6 +59,12 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
+//logout
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect("/urls");
+});
+
 //Registration Page
 app.get("/register", (req, res) => {
   res.render("register");
@@ -140,8 +146,7 @@ app.post("/login", (req, res) => {
         //set the user_id cookie to match the id found in the db
         res.cookie("user_id", id);
         res.redirect("/urls");
-
-  return;
+        return;
 
     }
   }
@@ -161,11 +166,11 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 
-//logout
-app.post("/logout", (req, res) => {
-  res.clearCookie("username");
-  res.redirect("/urls");
-})
+// //logout
+// app.post("/logout", (req, res) => {
+//   res.clearCookie("user_id");
+//   res.redirect("/urls");
+// });
 
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
