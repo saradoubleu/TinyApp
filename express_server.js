@@ -3,7 +3,7 @@
 var cookieParser = require('cookie-parser')
 const express = require("express");
 const app = express();
-app.use(cookieParser())
+app.use(cookieParser());
 
 //process.env.PORT says to listen on whatever is in the nvironment port or to listen on port 8080 if none are defined
 const PORT = process.env.PORT || 8080;
@@ -18,27 +18,34 @@ const urlDatabase = {
 };
 
 //Users - Data Store
-const users = {
+const userDatabase = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
+  "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
+  },
+  "user3RandomID": {
+    id: "user3RandomID",
+    email: "oprah@winfry.com",
+    password: "harpo"
   }
-}
+};
+
+// console.log(userDatabase);
 
 
 //new route handler
-app.get("/urls", (req, res) =>{
+app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"],
+    username: req.cookies["username"], //passed by the
   };
-      // console.log(templateVars.username);
+  // console.log(templateVars.username);
   res.render("urls_index", templateVars);
 });
 
@@ -47,17 +54,20 @@ app.get("/urls/new", (req, res) => {
 });
 
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 //Registration Page
-app.get("/register", (req, res) =>{
+app.get("/register", (req, res) => {
   res.render("register");
 })
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id] };
+    longURL: urlDatabase[req.params.id]
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -66,19 +76,66 @@ app.get("/urls/:id/edit", (req, res) => {
   const shortURL = req.params.id;
   const urlDB = urlDatabase[shortURL];
 
-  if(urlDB){
-    res.render("urls_show", {shortURL: shortURL, urlDB:urlDB});
+  if (urlDB) {
+    res.render("urls_show", {
+      shortURL: shortURL,
+      urlDB: urlDB
+    });
   } else {
     res.status(404);
     res.render("urls/404");
   }
 });
 
+//post registration credentials
+//-------SET COOKIES
+app.post("/register", (req, res) => {
+  //generate random string
+  var autogenID = generateRandomString();
+  //adds a new user object in db
+        console.log(autogenID);
+
+  const newUser = req.body.email;
+  const newPass = req.body.password;
+    if (newUser === "" || newPass == "") {
+      res.status(404).send("Your request failed! Please enter a value");
+      res.render("urls/404");
+            console.log(userDatabase);
+
+      return;
+    }
+            for (var id in userDatabase) {
+    if (newUser === userDatabase[id].email) {
+console.log("HIIII",userDatabase[id]);
+      res.status(404).send("Your request failed! becase it's a duplicate");
+      res.render("urls/404");
+            console.log(userDatabase);
+
+      return;
+    }
+  }
+          userDatabase[autogenID] = {
+        id: autogenID,
+        email: newUser,
+        password: newPass
+      };
+
+      res.cookie("user_id", autogenID);
+      res.redirect("/urls");
+            console.log(userDatabase);
+
+      return;
+
+
+});
+
+
+
 //post login credentials
 app.post("/login", (req, res) => {
-const userName = req.body.username;
-res.cookie("username", userName);
-res.redirect("/urls");
+  const userName = req.body.username;
+  res.cookie("username", userName);
+  res.redirect("/urls");
 });
 
 //logout
@@ -91,10 +148,10 @@ app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
 
-  if (longURL){
+  if (longURL) {
     urlDatabase[shortURL] = req.body.adr;
     res.redirect("/urls/");
-  }else{
+  } else {
     res.redirect(`/urls/${shortURL}`);
   }
 });
@@ -103,18 +160,18 @@ app.post("/urls/:id/delete", (req, res) => {
   const shortURL = req.params.id;
   const urlDB = urlDatabase[shortURL];
 
-  if (urlDB){
+  if (urlDB) {
 
     delete urlDatabase[shortURL];
-        res.redirect("/urls");
+    res.redirect("/urls");
 
-  }else{
+  } else {
 
     res.redirect("/urls");
   }
 });
 
-app.get("/", (req, res)=> {
+app.get("/", (req, res) => {
   res.end("Hello!'");
 });
 
@@ -123,18 +180,20 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/hello", (req, res) => {
-res.end("<html><body>Hello <b>World</b></body></html>\n");
+  res.end("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 app.listen(PORT, () => {
-console.log(`Example app listening on port ${PORT} !`);
+  console.log(`Example app listening on port ${PORT} !`);
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // debug statement to see POST parameters
+  console.log(req.body);
+  //assign random string function to variable called random
   var random = generateRandomString();
+  //add random to url DB = the value is from variable longURL
   urlDatabase[random] = req.body.longURL;
-  res.redirect("http://localhost:8080/urls/"+random);
+  res.redirect("http://localhost:8080/urls/" + random);
   console.log(urlDatabase);
   // urlDatabase[req.params.id]
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
@@ -146,7 +205,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 
-function generateRandomString(){
+function generateRandomString() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -155,4 +214,4 @@ function generateRandomString(){
 
   return text;
 }
-console.log(generateRandomString());
+// console.log(generateRandomString());
