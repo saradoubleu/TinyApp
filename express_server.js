@@ -43,9 +43,9 @@ const userDatabase = {
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"], //passed by the
+    username: req.cookies[userDatabase]
+    // username: req.cookies["username"],
   };
-  // console.log(templateVars.username);
   res.render("urls_index", templateVars);
 });
 
@@ -88,7 +88,6 @@ app.get("/urls/:id/edit", (req, res) => {
 });
 
 //post registration credentials
-//-------SET COOKIES
 app.post("/register", (req, res) => {
   //generate random string
   var autogenID = generateRandomString();
@@ -99,22 +98,17 @@ app.post("/register", (req, res) => {
   const newPass = req.body.password;
     if (newUser === "" || newPass == "") {
       res.status(404).send("Your request failed! Please enter a value");
-      res.render("urls/404");
-            console.log(userDatabase);
-
+      // res.render("urls/404");
       return;
     }
-            for (var id in userDatabase) {
+    for (var id in userDatabase) {
     if (newUser === userDatabase[id].email) {
-console.log("HIIII",userDatabase[id]);
       res.status(404).send("Your request failed! becase it's a duplicate");
-      res.render("urls/404");
-            console.log(userDatabase);
-
+      // res.render("urls/404");
       return;
     }
   }
-          userDatabase[autogenID] = {
+        userDatabase[autogenID] = {
         id: autogenID,
         email: newUser,
         password: newPass
@@ -122,20 +116,45 @@ console.log("HIIII",userDatabase[id]);
 
       res.cookie("user_id", autogenID);
       res.redirect("/urls");
-            console.log(userDatabase);
-
+            // console.log(userDatabase);
       return;
-
-
 });
 
 
 
 //post login credentials
 app.post("/login", (req, res) => {
-  const userName = req.body.username;
-  res.cookie("username", userName);
-  res.redirect("/urls");
+  // const userName = req.body.username;
+  const userName = req.body.email;
+  const password = req.body.password;
+
+      if (userName === "" || password == "") {
+      res.status(404).send("Please enter valid credentials");
+      return;
+    }
+
+    for (var id in userDatabase) {
+    if (username === userDatabase[id].email && password === userDatabase[id].password)
+    {
+// res.cookie("username", userName);
+res.redirect("/urls");
+      return;
+    }
+  }
+        userDatabase[autogenID] = {
+        id: autogenID,
+        email: newUser,
+        password: newPass
+      };
+
+      res.cookie("user_id", autogenID);
+      res.redirect("/urls");
+            // console.log(userDatabase);
+      return;
+});
+
+app.get("/login", (req, res) => {
+res.render("login");
 });
 
 //logout
