@@ -10,19 +10,12 @@
 <h1>
 URLS Index</h1>
 </header>
-
-<% if (username){ %>
+</p>
+<h6><%= username && username.email %></h6>
+<a href="register">Registration</a>
+<a href="/login">Login</a>
 <form method="POST" action="/logout" />
-  <%=username %>
   <button name="logout" value="/logout"/>Logout</button>
 </form>
-  <%}else { %>
-<form method="POST" action="/login"/>
-  <legend>Login Form
-  <input type="text" name="username"/>
-  <button value="Submit" name="Submit">Submit</button>
-  </legend>
-</form>
-<%}%>
 </body>
 </html>
