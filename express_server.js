@@ -1,5 +1,6 @@
 //Create a web server with Express
 'use strict'
+
 var cookieParser = require('cookie-parser')
 const express = require("express");
 const app = express();
@@ -43,7 +44,7 @@ const userDatabase = {
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies[userDatabase]
+    username: userDatabase[req.cookies.user_id]
     // username: req.cookies["username"],
   };
   res.render("urls_index", templateVars);
@@ -124,37 +125,35 @@ app.post("/register", (req, res) => {
 
 //post login credentials
 app.post("/login", (req, res) => {
-  // const userName = req.body.username;
   const userName = req.body.email;
   const password = req.body.password;
 
-      if (userName === "" || password == "") {
-      res.status(404).send("Please enter valid credentials");
-      return;
-    }
+  if (userName === "" || password == "") {
+    res.status(404).send("Please enter valid credentials");
+    return;
+  }
 
-    for (var id in userDatabase) {
-    if (username === userDatabase[id].email && password === userDatabase[id].password)
+  for (var id in userDatabase) {
+    if (userName == userDatabase[id].email && password == userDatabase[id].password)
     {
-// res.cookie("username", userName);
-res.redirect("/urls");
-      return;
+        res.redirect("/urls");
+  console.log("Found in database");
+  return;
+
     }
   }
-        userDatabase[autogenID] = {
-        id: autogenID,
-        email: newUser,
-        password: newPass
-      };
-
-      res.cookie("user_id", autogenID);
-      res.redirect("/urls");
-            // console.log(userDatabase);
+      res.redirect("/login");
+      console.log("Does not match")
       return;
-});
+
+  // res.cookie("user_id", autogenID);
+  // res.redirect("/urls");
+            // return;
+          });
+
 
 app.get("/login", (req, res) => {
-res.render("login");
+  res.render("login");
 });
 
 //logout

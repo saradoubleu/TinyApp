@@ -13,18 +13,18 @@ URLS Index</h1>
 <a href="register">Registration</a>
 <a href="/login">Login</a>
 </p>
-<!-- <% if (username){ %>
+<% if (username){ %>
+<h6><%= username && username.email %></h6>
 <form method="POST" action="/logout" />
-  <%=username %>
+  // <%=username %>
   <button name="logout" value="/logout"/>Logout</button>
 </form>
   <%}else { %>
-<form method="POST" action="/login"/>
-  <legend>Login Form
-  <input type="text" name="username"/>
-  <button value="Submit" name="Submit">Submit</button>
-  </legend>
-</form>
-<%}%> -->
+//     <form method="POST" action="/login"/>
+
+//   <input type="text" name="username"/>
+//   <button value="Submit" name="Submit">Submit</button>
+// </form>
+<%}%>
 </body>
 </html>
