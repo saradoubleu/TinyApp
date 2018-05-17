@@ -1,5 +1,5 @@
 //Create a web server with Express
-// 'use strict'
+'use strict'
 var cookieParser = require('cookie-parser')
 const express = require("express");
 const app = express();
@@ -31,6 +31,11 @@ app.get("/urls/new", (req, res) => {
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+
+//Registration Page
+app.get("/register", (req, res) =>{
+  res.render("register");
+})
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
