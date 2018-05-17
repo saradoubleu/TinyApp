@@ -10,11 +10,27 @@ const PORT = process.env.PORT || 8080;
 
 app.set("view engine", "ejs");
 
+//URLS - Data store
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
   "18TVx5": "http://www.thestar.com"
 };
+
+//Users - Data Store
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+}
+
 //new route handler
 app.get("/urls", (req, res) =>{
   let templateVars = {
