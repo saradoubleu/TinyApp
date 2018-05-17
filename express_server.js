@@ -128,21 +128,26 @@ app.post("/login", (req, res) => {
   const userName = req.body.email;
   const password = req.body.password;
 
-  if (userName === "" || password == "") {
+  if (userName === "" || password === "") {
     res.status(404).send("Please enter valid credentials");
     return;
   }
 
   for (var id in userDatabase) {
-    if (userName == userDatabase[id].email && password == userDatabase[id].password)
+    if (userName === userDatabase[id].email && password === userDatabase[id].password)
     {
-        res.redirect("/urls");
   console.log("Found in database");
+        //set the user_id cookie to match the id found in the db
+        res.cookie("user_id", id);
+        res.redirect("/urls");
+
   return;
 
     }
   }
-      res.redirect("/login");
+      // res.redirect("/login");
+      res.status(403).send("403 Forbidden Error");
+
       console.log("Does not match")
       return;
 
