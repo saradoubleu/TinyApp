@@ -1,9 +1,7 @@
 //Create a web server with Express
 'use strict'
-<<<<<<< HEAD
-=======
 
->>>>>>> feature/user-registration
+
 var cookieParser = require('cookie-parser')
 const express = require("express");
 const app = express();
