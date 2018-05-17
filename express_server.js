@@ -1,5 +1,5 @@
 //Create a web server with Express
-// 'use strict'
+'use strict'
 var cookieParser = require('cookie-parser')
 const express = require("express");
 const app = express();
@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 8080;
 
 app.set("view engine", "ejs");
 
-//URLS - Data store
+//url - Data Store
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
@@ -31,6 +31,7 @@ const users = {
   }
 }
 
+
 //new route handler
 app.get("/urls", (req, res) =>{
   let templateVars = {
@@ -47,6 +48,11 @@ app.get("/urls/new", (req, res) => {
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+
+//Registration Page
+app.get("/register", (req, res) =>{
+  res.render("register");
+})
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
