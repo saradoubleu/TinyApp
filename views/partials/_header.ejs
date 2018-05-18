@@ -12,10 +12,18 @@ URLS Index</h1>
 </header>
 </p>
 <h6><%= username && username.email %></h6>
+<table>
+<tr>
+<td>
 <a href="register">Registration</a>
+</td>
+<td>
 <a href="/login">Login</a>
+</td>
+<td>
 <form method="POST" action="/logout" />
   <button name="logout" value="/logout"/>Logout</button>
+  </td>
 </form>
 </body>
 </html>

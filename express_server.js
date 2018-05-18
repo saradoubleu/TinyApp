@@ -5,76 +5,151 @@
 var cookieParser = require('cookie-parser')
 const express = require("express");
 const app = express();
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 app.use(cookieParser());
 
-//process.env.PORT says to listen on whatever is in the nvironment port or to listen on port 8080 if none are defined
 const PORT = process.env.PORT || 8080;
 
 app.set("view engine", "ejs");
 
-//url - Data Store
+//URL DATA STORE VERSION 2
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
-  "18TVx5": "http://www.thestar.com"
-};
+  "userRandomID":
+  {
+    "b2xVn2": "http://www.lighthouselabs.ca",
+    "b2xVl1": "http://www.facebook.com",
+  },
+  "user2RandomID":
+  {
+    "18TVx5": "http://www.google.com",
+    "11xVl1": "http://www.thestar.com",
+  },
+  "user3RandomID":
+  {
+    "9sm5xK": "http://www.ttc.ca",
+  }
+}
 
-//Users - Data Store
+//USERS - DATA STORE
 const userDatabase = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "test"
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "test"
   },
   "user3RandomID": {
     id: "user3RandomID",
     email: "oprah@winfry.com",
     password: "harpo"
+  },
+    "user4RandomID": {
+    id: "user4RandomID",
+    email: "ok@go.co",
+    password: "test"
   }
 };
 
-// console.log(userDatabase);
 
-
-//new route handler
+//GET ALL URLS
 app.get("/urls", (req, res) => {
   let templateVars = {
-    urls: urlDatabase,
-    username: userDatabase[req.cookies.user_id]
-    // username: req.cookies["username"],
+    urls: urlDatabase[req.cookies.user_id],
+    username: userDatabase[req.cookies.user_id],
   };
+
+
   res.render("urls_index", templateVars);
+console.log(templateVars);
+
+  // for (var id in urlDatabase){
+  //   let templateVars = {
+  //     shortURL: urlDatabase,
+  //     username: userDatabase[req.cookies.user_id]
+  // };
+  // }
+
+  // if(userDatabase[req.cookies.user_id]){
+  //   res.redirect
+  // }
+
+
+
+
+  // // for(var id in userDatabase){
+  // //   if (userName === userDatabase[id].email && password === userDatabase[id].password){
+  // //           res.cookie("user_id", autogenID);
+  // //         // }
+  // // }else{
+  // // }
 });
 
+
+//REGISTRATION PAGE
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
+// //Registration Page
+// app.get("/register", (req, res) =>{
+//   res.render("register");
+// })
+
+
+
+//CREATE A NEW SHORT URL
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+//   var templateVars={
+//     urlDatabase[req.cookies.user_id]){
+//     userID: longURL
+// }
+
+    if(!userDatabase[req.cookies.user_id]){
+      res.redirect("login");
+    }
+    res.render("urls_new");
 });
 
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
+app.post("/urls/new", (req, res) =>{
+    const shortURL = req.params.id;
+    const urlDB = urlDatabase[shortURL];
 
-//logout
+var random = generateRandomString();
+  //add random to url DB = the value is from variable longURL
+  // urlDatabase[random] = req.body.urlDatabanewse;
+  urlDatabase[random] = {
+  id:random,
+  longURL: req.body.longURL,
+  userID: req.cookies.user_id
+}
+console.log(urlDatabase);
+// urlDatabase[random]
+//   if (urlDB) {
+//     res.render("urls_show", {
+//       shortURL: shortURL,
+//       urlDB: urlDB
+//     });
+
+
+res.redirect("urls_show");
+  // res.render("urls_new");
+});
+
+
+
+//LOGOUT
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
-//Registration Page
-app.get("/register", (req, res) => {
-  res.render("register");
-})
-
-//Registration Page
-app.get("/register", (req, res) =>{
-  res.render("register");
-})
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
@@ -85,39 +160,20 @@ app.get("/urls/:id", (req, res) => {
 });
 
 
-app.get("/urls/:id/edit", (req, res) => {
-  const shortURL = req.params.id;
-  const urlDB = urlDatabase[shortURL];
-
-  if (urlDB) {
-    res.render("urls_show", {
-      shortURL: shortURL,
-      urlDB: urlDB
-    });
-  } else {
-    res.status(404);
-    res.render("urls/404");
-  }
-});
-
-//post registration credentials
+//CREATE NEW USERS
 app.post("/register", (req, res) => {
-  //generate random string
   var autogenID = generateRandomString();
-  //adds a new user object in db
         console.log(autogenID);
 
   const newUser = req.body.email;
   const newPass = req.body.password;
     if (newUser === "" || newPass == "") {
       res.status(404).send("Your request failed! Please enter a value");
-      // res.render("urls/404");
       return;
     }
     for (var id in userDatabase) {
     if (newUser === userDatabase[id].email) {
       res.status(404).send("Your request failed! becase it's a duplicate");
-      // res.render("urls/404");
       return;
     }
   }
@@ -135,49 +191,60 @@ app.post("/register", (req, res) => {
 
 
 
-//post login credentials
+//LOGIN
 app.post("/login", (req, res) => {
   const userName = req.body.email;
   const password = req.body.password;
 
   if (userName === "" || password === "") {
-    res.status(404).send("Please enter valid credentials");
-    return;
+    return res.status(404).send("Please enter valid credentials");
   }
 
-  for (var id in userDatabase) {
-    if (userName === userDatabase[id].email && password === userDatabase[id].password)
+for (var id in userDatabase) {
+  if (userName === userDatabase[id].email && password === userDatabase[id].password)
     {
-  console.log("Found in database");
-        //set the user_id cookie to match the id found in the db
         res.cookie("user_id", id);
-        res.redirect("/urls");
-        return;
-
+        return res.redirect("/urls");
+        // res.redirect("/urls");
+      }
     }
-  }
-      // res.redirect("/login");
-      res.status(403).send("403 Forbidden Error");
 
-      console.log("Does not match")
-      return;
-
-  // res.cookie("user_id", autogenID);
-  // res.redirect("/urls");
-            // return;
-          });
+  return res.status(403).send("403 Forbidden Error");
 
 
+   });
+
+//RENDER LOGIN SCREEN
 app.get("/login", (req, res) => {
   res.render("login");
 });
 
-// //logout
-// app.post("/logout", (req, res) => {
-//   res.clearCookie("user_id");
-//   res.redirect("/urls");
-// });
+//EDIT URL
+app.get("/urls/:id/edit", (req, res) => {
+  const shortURL = req.params.id;
+  const owner = req.cookies.user_id;
+  const urlDB = urlDatabase[owner];
 
+console.log(urlDB);
+//   // const dbID = req.params.id;
+//   // const urlDB = urlDatabase[dbID];
+
+// // if(owner === urlDatabase[userID])
+//  // urlDatabase[userID])
+// {
+//     res.render("urls_show", {
+//       shortURL: shortURL,
+//       urlDB: urlDB
+//     });
+
+
+//   } else {
+//     res.status(404).send("Please login");
+//   }
+});
+
+
+//POST URLS FOR USER
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
@@ -190,6 +257,7 @@ app.post("/urls/:id", (req, res) => {
   }
 });
 
+//DELETE SHORT URL
 app.post("/urls/:id/delete", (req, res) => {
   const shortURL = req.params.id;
   const urlDB = urlDatabase[shortURL];
@@ -222,23 +290,32 @@ app.listen(PORT, () => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);
+  var userIdent = req.cookies.user_id;
+  // console.log(req.body);
   //assign random string function to variable called random
   var random = generateRandomString();
   //add random to url DB = the value is from variable longURL
-  urlDatabase[random] = req.body.longURL;
+  // urlDatabase[random] = req.body.urlDatabanewse;
+  urlDatabase[random] = {
+  id:random,
+  longURL: req.body.longURL,
+  userID:userIdent
+};
+
   res.redirect("http://localhost:8080/urls/" + random);
   console.log(urlDatabase);
   // urlDatabase[req.params.id]
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
+
 });
 
+//
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
 
-
+//RANDOM STRING GENERATOR
 function generateRandomString() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
