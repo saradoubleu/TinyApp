@@ -2,16 +2,19 @@
 'use strict'
 
 
-var cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser')
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const PORT = process.env.PORT || 8080;
+const bcrypt = require('bcrypt');
+// const password = "purple-monkey-dinosaur"; // you will probably this from req.params
+// const hashedPassword = bcrypt.hashSync(password, 10);
+
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-app.use(cookieParser());
-
-const PORT = process.env.PORT || 8080;
 
 app.set("view engine", "ejs");
 
@@ -58,37 +61,16 @@ const userDatabase = {
 };
 
 
-//GET ALL URLS
+//GET ALL URLS FOR LOGGED IN USER
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase[req.cookies.user_id],
     username: userDatabase[req.cookies.user_id],
   };
 
-
   res.render("urls_index", templateVars);
 console.log(templateVars);
 
-  // for (var id in urlDatabase){
-  //   let templateVars = {
-  //     shortURL: urlDatabase,
-  //     username: userDatabase[req.cookies.user_id]
-  // };
-  // }
-
-  // if(userDatabase[req.cookies.user_id]){
-  //   res.redirect
-  // }
-
-
-
-
-  // // for(var id in userDatabase){
-  // //   if (userName === userDatabase[id].email && password === userDatabase[id].password){
-  // //           res.cookie("user_id", autogenID);
-  // //         // }
-  // // }else{
-  // // }
 });
 
 
@@ -97,14 +79,23 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
-// //Registration Page
-// app.get("/register", (req, res) =>{
-//   res.render("register");
-// })
-
-
-
 //CREATE A NEW SHORT URL
+app.post("/urls/new", (req, res) => {
+  var random = generateRandomString();
+  urlDatabase[req.cookies.user_id][random] = req.body.longURL;
+  console.log(urlDatabase);
+  res.redirect("/urls");
+});
+
+
+//LOGOUT
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect("/urls");
+  //req.session=null
+});
+
+//***GET NEW URLS
 app.get("/urls/new", (req, res) => {
 //   var templateVars={
 //     urlDatabase[req.cookies.user_id]){
@@ -117,40 +108,7 @@ app.get("/urls/new", (req, res) => {
     res.render("urls_new");
 });
 
-app.post("/urls/new", (req, res) =>{
-    const shortURL = req.params.id;
-    const urlDB = urlDatabase[shortURL];
-
-var random = generateRandomString();
-  //add random to url DB = the value is from variable longURL
-  // urlDatabase[random] = req.body.urlDatabanewse;
-  urlDatabase[random] = {
-  id:random,
-  longURL: req.body.longURL,
-  userID: req.cookies.user_id
-}
-console.log(urlDatabase);
-// urlDatabase[random]
-//   if (urlDB) {
-//     res.render("urls_show", {
-//       shortURL: shortURL,
-//       urlDB: urlDB
-//     });
-
-
-res.redirect("urls_show");
-  // res.render("urls_new");
-});
-
-
-
-//LOGOUT
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
-  res.redirect("/urls");
-});
-
-
+//***GET NEW URLS
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
@@ -162,57 +120,60 @@ app.get("/urls/:id", (req, res) => {
 
 //CREATE NEW USERS
 app.post("/register", (req, res) => {
-  var autogenID = generateRandomString();
-        console.log(autogenID);
+    const newUser = req.body.email;
+  const newPass = req.body.password
+  // const newPass = req.body.password;
 
-  const newUser = req.body.email;
-  const newPass = req.body.password;
-    if (newUser === "" || newPass == "") {
-      res.status(404).send("Your request failed! Please enter a value");
-      return;
-    }
-    for (var id in userDatabase) {
+  // const bcrypt = require('bcrypt');
+const hashedPassword = bcrypt.hashSync(newPass, 10);
+
+  var autogenID = generateRandomString();
+  console.log(autogenID);
+
+
+  if (newUser === "" || newPass == "") {
+    res.status(404).send("Your request failed! Please enter a value");
+    return;
+  }
+  for (var id in userDatabase) {
     if (newUser === userDatabase[id].email) {
       res.status(404).send("Your request failed! becase it's a duplicate");
       return;
     }
   }
-        userDatabase[autogenID] = {
-        id: autogenID,
-        email: newUser,
-        password: newPass
-      };
+  userDatabase[autogenID] = {
+    id: autogenID,
+    email: newUser,
+    password: hashedPassword
+  };
 
-      res.cookie("user_id", autogenID);
-      res.redirect("/urls");
-            // console.log(userDatabase);
-      return;
+  res.cookie("user_id", autogenID);
+  res.redirect("/urls");
+  // console.log(userDatabase);
+  return;
 });
-
 
 
 //LOGIN
 app.post("/login", (req, res) => {
   const userName = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   if (userName === "" || password === "") {
     return res.status(404).send("Please enter valid credentials");
   }
 
-for (var id in userDatabase) {
-  if (userName === userDatabase[id].email && password === userDatabase[id].password)
-    {
-        res.cookie("user_id", id);
-        return res.redirect("/urls");
-        // res.redirect("/urls");
-      }
+  for (var id in userDatabase) {
+    if (userName === userDatabase[id].email && bcrypt.compareSync(password, hashedPassword)) {
+      res.cookie("user_id", id);
+      return res.redirect("/urls");
     }
+  }
 
   return res.status(403).send("403 Forbidden Error");
 
-
-   });
+});
 
 //RENDER LOGIN SCREEN
 app.get("/login", (req, res) => {
@@ -222,22 +183,20 @@ app.get("/login", (req, res) => {
 //EDIT URL
 app.get("/urls/:id/edit", (req, res) => {
   const shortURL = req.params.id;
-  const owner = req.cookies.user_id;
+  // const owner = req.cookies.user_id;
   const urlDB = urlDatabase[owner];
 
-console.log(urlDB);
-//   // const dbID = req.params.id;
-//   // const urlDB = urlDatabase[dbID];
+// console.log(urlDB);
+// //   // const dbID = req.params.id;
+// //   // const urlDB = urlDatabase[dbID];
 
 // // if(owner === urlDatabase[userID])
-//  // urlDatabase[userID])
+// //  // urlDatabase[userID])
 // {
 //     res.render("urls_show", {
 //       shortURL: shortURL,
 //       urlDB: urlDB
-//     });
-
-
+//     }
 //   } else {
 //     res.status(404).send("Please login");
 //   }
@@ -273,6 +232,8 @@ app.post("/urls/:id/delete", (req, res) => {
   }
 });
 
+
+//RENDER LOCAL HOST
 app.get("/", (req, res) => {
   res.end("Hello!'");
 });
