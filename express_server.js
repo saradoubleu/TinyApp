@@ -2,16 +2,28 @@
 'use strict'
 
 
-const cookieParser = require('cookie-parser')
+// const cookieParser = require('cookie-parser')
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const PORT = process.env.PORT || 8080;
 const bcrypt = require('bcrypt');
+var cookieSession = require('cookie-session')
+var Keygrip = require('keygrip');
+
+
 // const password = "purple-monkey-dinosaur"; // you will probably this from req.params
 // const hashedPassword = bcrypt.hashSync(password, 10);
 
-app.use(cookieParser());
+// app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+    keys: new Keygrip(['key1', 'key2'], 'SHA384', 'base64'),
+  // keys: [/* secret keys */],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 app.use(bodyParser.urlencoded({
   extended: true
 }));
@@ -64,8 +76,10 @@ const userDatabase = {
 //GET ALL URLS FOR LOGGED IN USER
 app.get("/urls", (req, res) => {
   let templateVars = {
-    urls: urlDatabase[req.cookies.user_id],
-    username: userDatabase[req.cookies.user_id],
+    // urls: urlDatabase[req.cookies.user_id],
+        urls: urlDatabase[req.session.user_id],
+            username: userDatabase[req.session.user_id],
+    // username: userDatabase[req.cookies.user_id],
   };
 
   res.render("urls_index", templateVars);
@@ -82,7 +96,8 @@ app.get("/register", (req, res) => {
 //CREATE A NEW SHORT URL
 app.post("/urls/new", (req, res) => {
   var random = generateRandomString();
-  urlDatabase[req.cookies.user_id][random] = req.body.longURL;
+    urlDatabase[req.session.user_id][random] = req.body.longURL;
+  // urlDatabase[req.cookies.user_id][random] = req.body.longURL;
   console.log(urlDatabase);
   res.redirect("/urls");
 });
@@ -90,9 +105,10 @@ app.post("/urls/new", (req, res) => {
 
 //LOGOUT
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  // res.clearCookie("user_id");
+    req.session=null;
   res.redirect("/urls");
-  //req.session=null
+
 });
 
 //***GET NEW URLS
@@ -102,7 +118,7 @@ app.get("/urls/new", (req, res) => {
 //     userID: longURL
 // }
 
-    if(!userDatabase[req.cookies.user_id]){
+    if(!userDatabase[req.session.user_id]){
       res.redirect("login");
     }
     res.render("urls_new");
@@ -147,7 +163,8 @@ const hashedPassword = bcrypt.hashSync(newPass, 10);
     password: hashedPassword
   };
 
-  res.cookie("user_id", autogenID);
+req.session.user_id = "user_id", autogenID;
+  // res.cookie("user_id", autogenID);
   res.redirect("/urls");
   // console.log(userDatabase);
   return;
@@ -166,7 +183,8 @@ app.post("/login", (req, res) => {
 
   for (var id in userDatabase) {
     if (userName === userDatabase[id].email && bcrypt.compareSync(password, hashedPassword)) {
-      res.cookie("user_id", id);
+            req.session.user_id = id;
+      // res.cookie("user_id", id);
       return res.redirect("/urls");
     }
   }
@@ -251,7 +269,7 @@ app.listen(PORT, () => {
 });
 
 app.post("/urls", (req, res) => {
-  var userIdent = req.cookies.user_id;
+  var userIdent = req.session.user_id;
   // console.log(req.body);
   //assign random string function to variable called random
   var random = generateRandomString();
