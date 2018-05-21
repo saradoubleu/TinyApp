@@ -1,29 +1,33 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <title>TinyApp</title>
+  <style>
+  p {
+    padding-right: 30px;
+
+    }
+     h6{
+    padding-right: 30px;
+    }
+    input {padding-right: 30px;
+    }
+</style>
 </head>
 <body>
-<header>
-<h1>
-URLS Index</h1>
-</header>
-</p>
-<h6><%= username && username.email %></h6>
-<table>
-<tr>
-<td>
-<a href="register">Registration</a>
-</td>
-<td>
-<a href="/login">Login</a>
-</td>
-<td>
-<form method="POST" action="/logout" />
-  <button name="logout" value="/logout"/>Logout</button>
-  </td>
-</form>
-</body>
-</html>
+  <header>
+    <h1 align="center">The Tiny App</h1>
+  </header>
+<% if(user) { %>
+  <div class="wrapper">
+  <form action="/logout" method="POST">
+  </div>
+   <h6 align="right"> Welcome: <%= user.email %> </h6>
+    <p align="right"><input type="submit" value="Logout"></p>
+  </form>
+<% } else { %>
+ <p align="right"><a href="register">Register</a> | <a href="/login">Login</a></p>
+<% } %>
+    </body>
+    <hr>
+    </html>

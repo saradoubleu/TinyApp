@@ -3,35 +3,61 @@
 <head>
   <title>TinyApp</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
-
+<style>
+ body{background-color: #660066;
+ }
+ td{
+  padding-left: 15px;
+  text-align: left;
+ }
+#container{
+  background-color: white;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 3em;
+  padding-top:36px;
+  border:
+  1px solid white;border-radius:
+  15px;width:
+  1000px;height:
+  800px;}
+#navbar{position:absolute;}
+</style>
 </head>
 <body>
+  <div id = "container">
+
   <header>
     <% include ./partials/_header %>
 </header>
+<p align="right"><a href="/urls/new"> Create A New Short URL</a></p>
 <table>
-    <% for(url in urls) { %>
+    <% Object.keys(urls).forEach(url => { %>
       <tr>
+      <td><b>short url &rarr; </b></td>
     <td><%= url %></td>
-    <td><%= username[urls] %></td>
+    <td><b>long url &rarr;</b></td>
+    <td><%= urls[url] %></td>
     <td>
     </td>
     <td>
-      <form method="POST" action= "/urls/<%= url %>/edit">
-      <input type="submit" value="Edit" name="Edit"/>
+      <form action="/urls/<%= url %>">
+      <label> <%= %></label>
+      <input type="submit" value="Edit"/>
     </form>
   </td>
       <td>
-      <form method="POST" action= "/urls/<%= url %>/delete">
-      <input type="submit" value="delete" name="Delete"/>
-    </form>
+      <form method="POST" action= "/urls/<%=url%>/delete?_method=DELETE">
+      <input type="submit" value="Delete" name="Delete"/>
   </td>
 </tr>
-<tr>
-  <% } %>
+  <% }) %>
+
 </table>
+      </div>
+    </div>
 <br>
-<a href="/urls/new"> Create New </button></a>
+
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
