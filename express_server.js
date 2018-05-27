@@ -16,12 +16,14 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(methodOverride("_method"));
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 
 app.use(cookieSession({
   name: 'session',
-    keys: ["keyone","keytwo"],
+  keys: ["keyone", "keytwo"],
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
@@ -31,20 +33,20 @@ let urlDatabase = {
     url: "http://www.lighthouselabs.ca",
     userID: "userRandomID"
   },
-  b2xSn2:{
+  b2xSn2: {
     url: "http://www.lightshouselabs.ca",
     userID: "userRandomID2"
-},
+  },
   "b2xVl1": {
     shortURL: "b2xVl1",
     longURL: "http://www.facebook.com",
     userId: "banana"
-    },
+  },
   "9sm5xK": {
     shortURL: "9sm5xK",
     longURL: "http://www.ttc.com",
     userId: "user3RandomID"
-}
+  }
 };
 
 
@@ -64,7 +66,7 @@ const userDatabase = {
     email: "oprah@winfry.com",
     hashedPassword: "test"
   },
-    user4RandomID: {
+  user4RandomID: {
     id: "user4RandomID",
     email: "ok@go.co",
     hashedPassword: "test"
@@ -80,8 +82,9 @@ function generateRandomString() {
 
   return text;
 }
+
 function getId(object, key, value) {
-  for (const id in object){
+  for (const id in object) {
     if (object[id][key] === value) return id;
   }
   return false;
@@ -100,14 +103,14 @@ function usersUrls(user_id) {
 
 app.get("/", (req, res) => {
   if (req.session.user_id) {
-  res.redirect("/urls");
+    res.redirect("/urls");
   } else {
     res.redirect("/login");
   }
 });
 
 app.get("/login", (req, res) => {
-  if (req.session.user_id){
+  if (req.session.user_id) {
     res.redirect("/urls")
   }
   const templateVars = {
@@ -124,8 +127,8 @@ app.get("/register", (req, res) => {
     const templateVars = {
       user: userDatabase[req.session.user_id]
     };
-  res.render("register", templateVars);
-}
+    res.render("register", templateVars);
+  }
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -141,7 +144,7 @@ app.get("/urls/new", (req, res) => {
   let templateVars = {
     user: userDatabase[req.session.user_id]
   }
-  if (templateVars.user){
+  if (templateVars.user) {
     res.render("urls_new", templateVars);
   } else {
     res.redirect("/login")
@@ -149,16 +152,16 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  if (req.session.user_id){
-  let templateVars = {
-    user: userDatabase[req.session.user_id],
-    urls: usersUrls(req.session.user_id)
-  };
-  res.render("urls_index", templateVars);
-} else {
+  if (req.session.user_id) {
+    let templateVars = {
+      user: userDatabase[req.session.user_id],
+      urls: usersUrls(req.session.user_id)
+    };
+    res.render("urls_index", templateVars);
+  } else {
     res.status(401).send("Please loggin to view your URLs")
 
-}
+  }
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -166,22 +169,23 @@ app.get("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id]) {
     if (req.session.user_id) {
       let templateVars = {
-      user: userDatabase[req.session.user_id],
-      shortURL: req.params.id,
-      urls: userUrls,
-      error: ""
+        user: userDatabase[req.session.user_id],
+        shortURL: req.params.id,
+        urls: userUrls,
+        error: ""
       };
       if (userUrls[req.params.id]) {
         res.render("urls_show", templateVars);
       } else {
-        templateVars = { ...templateVars, error: "You are not authorized to perform this action" };
+        templateVars = { ...templateVars,
+          error: "You are not authorized to perform this action"
+        };
         res.render("urls_show", templateVars);
       }
     } else {
       res.status(401).send("Please login");
     }
-  }
-  else {
+  } else {
     res.status(404).send("This URL is not found");
   }
 });
@@ -201,28 +205,28 @@ app.post("/urls", (req, res) => {
   res.redirect('/urls');
 });
 
-app.delete("/urls/:id/delete",(req, res) => {
+app.delete("/urls/:id/delete", (req, res) => {
   const userUrls = usersUrls(req.session.user_id);
-  if(urlDatabase[req.params.id]){
-    if(req.session.user_id){
-      if(userUrls[req.params.id]){
-        delete (urlDatabase[req.params.id]);
+  if (urlDatabase[req.params.id]) {
+    if (req.session.user_id) {
+      if (userUrls[req.params.id]) {
+        delete(urlDatabase[req.params.id]);
         res.redirect('/urls');
       } else {
         res.status(401);
       }
     } else {
-        res.status(401);
+      res.status(401);
     }
   } else {
-        res.status(401);
+    res.status(401);
   }
 })
 
-app.put("/urls/:id",(req, res) => {
+app.put("/urls/:id", (req, res) => {
   if (urlDatabase[req.params.id]) {
     if (req.session.user_id) {
-      if (usersUrls(req.session.user_id)[req.params.id]){
+      if (usersUrls(req.session.user_id)[req.params.id]) {
         urlDatabase[req.params.id].url = req.body.newLongURL;
         res.redirect('/urls');
       }
@@ -236,7 +240,7 @@ app.put("/urls/:id",(req, res) => {
 
 app.post("/login", (req, res) => {
   const userId = getId(userDatabase, "email", req.body.email);
-  if (userId && bcrypt.compareSync(req.body.password, userDatabase[userId].hashedPassword)){
+  if (userId && bcrypt.compareSync(req.body.password, userDatabase[userId].hashedPassword)) {
     req.session.user_id = userId;
     res.redirect('/urls');
   } else {
@@ -245,9 +249,9 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  if (!req.body.email || !req.body.password ){
+  if (!req.body.email || !req.body.password) {
     res.status(400).send("Please enter valid credentials for email and password")
-  } else if (getId(userDatabase, "email", req.body.email)){
+  } else if (getId(userDatabase, "email", req.body.email)) {
     res.status(403).send("This user already exists. Please Try again");
   } else {
     const userid = generateRandomString();
@@ -255,12 +259,12 @@ app.post("/register", (req, res) => {
       email: req.body.email,
       hashedPassword: bcrypt.hashSync(req.body.password, 10)
     }
-   req.session.user_id = userid;
-   res.redirect("/urls");
+    req.session.user_id = userid;
+    res.redirect("/urls");
   }
 });
 
 app.listen(PORT, () => {
-    console.log(`Example app listening on port ${PORT} !`);
+  console.log(`Example app listening on port ${PORT} !`);
 
 });
